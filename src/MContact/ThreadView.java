@@ -71,8 +71,11 @@ class ThreadView {
         return msg;
     }
 
-    public ThreadView(Stage stage, String name) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("ThreadView.fxml"));
+    public ThreadView(Stage stage, String name, ThreadController threadController) throws IOException {
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("ThreadView.fxml"));
+        loader.setController(threadController);
+        loader.setClassLoader(getClass().getClassLoader());
+        Parent root = loader.load();
 
         stage.setTitle("MContact - " + name);
         stage.setMinHeight(300);
@@ -83,5 +86,6 @@ class ThreadView {
 
         stage.setScene(scene);
         stage.show();
+        stage.toFront();
     }
 }
