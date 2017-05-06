@@ -5,8 +5,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,7 +12,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
@@ -45,7 +42,6 @@ public class ThreadController {
     @FXML
     private ScrollPane threadPane;
 
-    private String role;
     private PrintWriter netOut;
     private BufferedReader netIn;
 
@@ -54,19 +50,10 @@ public class ThreadController {
 
         String body = inputArea.getText();
         if(body.length() < 1) {
-//            inputArea.setText("");
             return;
         }
-//        if(role == "server")
-//        {
-//            body = "msg from sever";
-//        }
-//        else
-//        {
-//            body = "msg from client";
-//        }
 
-        threadBox.getChildren().add(ThreadView.addMsg(body, "16.09.2017", true, threadBox.getWidth(), threadPane));
+        threadBox.getChildren().add(ThreadView.addMsg(body, "17.09.2017", true, threadBox.getWidth(), threadPane));
 
         netOut.println(body);
 
@@ -93,40 +80,34 @@ public class ThreadController {
 
     @FXML
     public void Connect0() throws IOException {
+        Runnable runnable = () -> {
 
-        role = "client";
-        Runnable runnable = new Runnable() {
+            try {
+                Socket socket = new Socket("127.0.0.1", 8420);
 
-            public void run () {
+                // loop forever, or until the server closes the connection
+                while (true) {
 
-                try {
-                    Socket socket = new Socket("127.0.0.1", 8420);
+                    netOut = new PrintWriter(socket.getOutputStream(),true);
+                    netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                    // loop forever, or until the server closes the connection
-                    while (true) {
+                    String input = netIn.readLine();
+                    final String msgbody = input;
 
-                        netOut = new PrintWriter(socket.getOutputStream(),true);
-                        netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    if(input == null)
+                        break;
 
-                        String input = netIn.readLine();
-                        final String msgbody = input;
-
-                        Platform.runLater(new Runnable() {
-                            @Override public void run() {
-                                addMsg(msgbody);
-                            }
-                        });
-                        System.out.println("Client 0 got: " + input);
-                    }
-                } catch (SocketException sx) {
-                    System.out.println("Socket CLIENT0 closed, user has shutdown the connection, or network has failed");
-                } catch (IOException ex) {
-                    System.out.println(ex.getMessage() + ex);
-                } catch (Exception ex) {
-                    System.out.println(ex.getMessage() + ex);
-                } finally {
-
+                    Platform.runLater(() -> addMsg(msgbody));
+                    System.out.println("Client 0 got: " + input);
                 }
+            } catch (SocketException sx) {
+                System.out.println("Socket CLIENT0 closed, user has shutdown the connection, or network has failed");
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage() + ex);
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage() + ex);
+            } finally {
+
             }
         };
 
@@ -138,9 +119,7 @@ public class ThreadController {
 
     @FXML
     public void Server0() throws IOException {
-        role = "server";
-        Runnable serverLoop = new Runnable() {
-            public synchronized void run() {
+        Runnable serverLoop = () -> {
                 System.out.println("Starting server 0");
                 try {
                     ServerSocket serverSocket = new ServerSocket(8420);
@@ -157,23 +136,16 @@ public class ThreadController {
                                         netOut = new PrintWriter(clientSocket.getOutputStream(),true);
                                         netIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-//                                        System.out.println("Server 0 is sending data");
-
-//                                        out.println("server0server0server0server0server0server0server0");
-
-//                                        System.out.println("Server 0 sent data");
-
                                         String input = null;
 
                                         input = netIn.readLine();
 
+                                        if(input == null)
+                                            break;
+
                                         final String msgbody = input;
 
-                                        Platform.runLater(new Runnable() {
-                                            @Override public void run() {
-                                                addMsg(msgbody);
-                                            }
-                                        });
+                                        Platform.runLater(() -> addMsg(msgbody));
 
                                         System.out.println("Server 0 got: " + input + " from " + clientSocket.getInetAddress());
                                     } catch (IOException e) {
@@ -195,7 +167,6 @@ public class ThreadController {
                     System.out.println(ex.getMessage() + ex);
                 }
 
-            }
         };
         new Thread(serverLoop).start();
 
@@ -203,7 +174,7 @@ public class ThreadController {
 
     }
 
-    static void slowScrollToBottom(ScrollPane scrollPane) {
+    private static void slowScrollToBottom(ScrollPane scrollPane) {
         Animation animation = new Timeline(
                 new KeyFrame(Duration.seconds(0.15),
                         new KeyValue(scrollPane.vvalueProperty(), 1)));
@@ -214,35 +185,8 @@ public class ThreadController {
     void initialize() {
         nameLabel.setText("John Smith");
 
-        threadBox.heightProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldvalue, Number newValue) {
-                System.out.println("height changed: " + newValue);
-                //threadPane.setVvalue(1.0);
-                slowScrollToBottom(threadPane);
-            }
+        threadBox.heightProperty().addListener((observable, oldValue, newValue) -> {
+            slowScrollToBottom(threadPane);
         });
-
-//        threadPane.widthProperty().addListener(new ChangeListener<Number>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Number> observable, Number oldvalue, Number newValue) {
-//                System.out.println("width changed of scrollpane: " + newValue);
-////                threadPane.setVvalue(1.0);
-//            }
-//        });
     }
-
-    @FXML
-    public void onSendButton() {
-//        System.out.println("sendButton clicked");
-        HBox tmpmsg = ThreadView.addMsg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "14.09.2016", true, threadBox.getWidth(), threadPane);
-//        Text tmptext = (Text)(((VBox)tmpmsg.getChildren().get(0)).getChildren().get(0));
-
-
-        threadBox.getChildren().add(tmpmsg);
-        threadBox.getChildren().add(ThreadView.addMsg("bbbbb b bbbbbb bbbbbb bbbbb bbbb bb bb bb bbbb bbbbbb bbb bbb", "16.09.2017", false, threadBox.getWidth(), threadPane));
-        //System.out.println(threadPane.getVvalue());
-        //threadPane.setVvalue(2.0);
-    }
-
 }

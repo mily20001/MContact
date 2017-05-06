@@ -8,48 +8,33 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="473.0" prefWidth="293.0" styleClass="test" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MContact.ThreadController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="473.0" prefWidth="293.0" styleClass="threadWindow" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MContact.ThreadController">
    <children>
-      <HBox alignment="CENTER_LEFT" prefWidth="293.0">
+      <HBox>
          <children>
-            <Label fx:id="nameLabel" maxWidth="162.0" prefHeight="19.0" prefWidth="162.0" styleClass="user_name" stylesheets="@style.css" text="Label" HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" onAction="#Server0" text="S0" />
-            <Button fx:id="connectButton" mnemonicParsing="false" onAction="#Connect0" text="C0" />
-            <Button fx:id="challangeButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#sendMessage" prefHeight="29.0" prefWidth="58.0" text="Challange" HBox.hgrow="NEVER" />
+            <Button mnemonicParsing="false" onAction="#Server0" text="Server" />
+            <Button mnemonicParsing="false" onAction="#Connect0" text="Client" />
+            <Button mnemonicParsing="false" text="Button" />
+            <Button mnemonicParsing="false" text="Button" />
          </children>
       </HBox>
-      <ScrollPane fx:id="threadPane" fitToWidth="true" maxHeight="10000.0" maxWidth="10000.0" styleClass="test2" stylesheets="@style.css" VBox.vgrow="ALWAYS">
+      <HBox alignment="CENTER_LEFT" prefWidth="293.0">
+         <children>
+            <Label fx:id="nameLabel" maxWidth="1.7976931348623157E308" prefWidth="10000.0" styleClass="user_name" stylesheets="@style.css" text="Label" HBox.hgrow="ALWAYS" />
+            <Button fx:id="challangeButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#sendMessage" prefHeight="29.0" prefWidth="80.0" text="Challange" HBox.hgrow="NEVER" />
+         </children>
+      </HBox>
+      <ScrollPane fx:id="threadPane" fitToWidth="true" maxHeight="10000.0" maxWidth="10000.0" styleClass="threadPane" stylesheets="@style.css" VBox.vgrow="ALWAYS">
          <content>
             <VBox fx:id="threadBox" prefHeight="0.0" prefWidth="291.0" spacing="5.0">
-               <children>
-                  <!--<HBox alignment="TOP_RIGHT" prefHeight="512.0" prefWidth="291.0">-->
-                     <!--<children>-->
-                        <!--<VBox alignment="TOP_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="381.0" prefWidth="186.0">-->
-                           <!--<children>-->
-                              <!--<Text text="aasd sfgm sdfsfs sdsdfsdfsdfsdfsdfsdfsdflkgm sdlkgm sdklmg" wrappingWidth="200.0" VBox.vgrow="ALWAYS" />-->
-                              <!--<Label alignment="CENTER" text="12.09.2016" />-->
-                           <!--</children>-->
-                        <!--</VBox>-->
-                     <!--</children>-->
-                  <!--</HBox>-->
-                  <!--<HBox layoutX="10.0" layoutY="10.0" maxWidth="1.7976931348623157E308">-->
-                     <!--<children>-->
-                        <!--<VBox maxWidth="1.7976931348623157E308" prefWidth="10000.0" HBox.hgrow="ALWAYS">-->
-                           <!--<children>-->
-                              <!--<Label ellipsisString="LOL" maxHeight="1.7976931348623157E308" prefWidth="100" text="aasdsfgmsdlkg msdlkgms dkasdadada sdadasdadkasjdadlmg" textOverrun="CENTER_ELLIPSIS" wrapText="true" VBox.vgrow="ALWAYS" />-->
-                              <!--<Label alignment="CENTER" text="12.09.2016" />-->
-                           <!--</children>-->
-                        <!--</VBox>-->
-                     <!--</children>-->
-                  <!--</HBox>-->
-               </children>
                <padding>
                   <Insets bottom="7.0" />
                </padding></VBox>
          </content>
          <VBox.margin>
             <Insets />
-         </VBox.margin></ScrollPane>
+         </VBox.margin>
+      </ScrollPane>
       <HBox maxWidth="1.7976931348623157E308" prefHeight="0.0">
          <children>
             <TextArea fx:id="inputArea" maxHeight="250.0" maxWidth="1.7976931348623157E308" onKeyPressed="#inputAreaKeyPressed" onKeyReleased="#inputAreaKeyPressed" prefWidth="10000.0" scrollLeft="1.0" scrollTop="1.0" styleClass="text_input" stylesheets="@style.css" wrapText="true" />
