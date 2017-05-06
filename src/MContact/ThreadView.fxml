@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="473.0" prefWidth="293.0" styleClass="threadWindow" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MContact.ThreadController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="473.0" prefWidth="293.0" styleClass="threadWindow" stylesheets="@ThreadStyle.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MContact.ThreadController">
    <children>
       <HBox>
          <children>
@@ -20,11 +20,11 @@
       </HBox>
       <HBox alignment="CENTER_LEFT" prefWidth="293.0">
          <children>
-            <Label fx:id="nameLabel" maxWidth="1.7976931348623157E308" prefWidth="10000.0" styleClass="user_name" stylesheets="@style.css" text="Label" HBox.hgrow="ALWAYS" />
+            <Label fx:id="nameLabel" maxWidth="1.7976931348623157E308" prefWidth="10000.0" styleClass="user_name" stylesheets="@ThreadStyle.css" text="Label" HBox.hgrow="ALWAYS" />
             <Button fx:id="challangeButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#sendMessage" prefHeight="29.0" prefWidth="80.0" text="Challange" HBox.hgrow="NEVER" />
          </children>
       </HBox>
-      <ScrollPane fx:id="threadPane" fitToWidth="true" maxHeight="10000.0" maxWidth="10000.0" styleClass="threadPane" stylesheets="@style.css" VBox.vgrow="ALWAYS">
+      <ScrollPane fx:id="threadPane" fitToWidth="true" maxHeight="10000.0" maxWidth="10000.0" styleClass="threadPane" stylesheets="@ThreadStyle.css" VBox.vgrow="ALWAYS">
          <content>
             <VBox fx:id="threadBox" prefHeight="0.0" prefWidth="291.0" spacing="5.0">
                <padding>
@@ -37,7 +37,7 @@
       </ScrollPane>
       <HBox maxWidth="1.7976931348623157E308" prefHeight="0.0">
          <children>
-            <TextArea fx:id="inputArea" maxHeight="250.0" maxWidth="1.7976931348623157E308" onKeyPressed="#inputAreaKeyPressed" onKeyReleased="#inputAreaKeyPressed" prefWidth="10000.0" scrollLeft="1.0" scrollTop="1.0" styleClass="text_input" stylesheets="@style.css" wrapText="true" />
+            <TextArea fx:id="inputArea" maxHeight="250.0" maxWidth="1.7976931348623157E308" onKeyPressed="#inputAreaKeyPressed" onKeyReleased="#inputAreaKeyPressed" prefWidth="10000.0" scrollLeft="1.0" scrollTop="1.0" styleClass="text_input" stylesheets="@ThreadStyle.css" wrapText="true" />
             <Button fx:id="sendButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#sendMessage" prefHeight="100.0" prefWidth="50.0" text="Send" />
          </children>
       </HBox>

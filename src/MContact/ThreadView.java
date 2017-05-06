@@ -71,15 +71,15 @@ class ThreadView {
         return msg;
     }
 
-    public ThreadView(Stage stage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("view2.fxml"));
+    public ThreadView(Stage stage, String name) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("ThreadView.fxml"));
 
-        stage.setTitle("MContact");
+        stage.setTitle("MContact - " + name);
         stage.setMinHeight(300);
         stage.setMinWidth(200);
         Scene scene = new Scene(root, 250, 350);
 
-        scene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+        scene.getStylesheets().add(this.getClass().getResource("ThreadStyle.css").toExternalForm());
 
         stage.setScene(scene);
         stage.show();

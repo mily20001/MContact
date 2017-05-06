@@ -1,0 +1,17 @@
+.mainWindow {
+    -fx-background-color: #383838;
+    -fx-stroke: green;
+}
+
+.nameLabel {
+    -fx-text-fill: white;
+}
+
+.portLabel {
+    -fx-text-fill: white;
+}
+
+.mainButton {
+    -fx-base: #404040;
+    -fx-text-fill: white;
+}

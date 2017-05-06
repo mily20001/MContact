@@ -7,7 +7,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception{
-        ThreadView threadView = new ThreadView(stage);
+        MainView mainView = new MainView(stage);
     }
 
 
