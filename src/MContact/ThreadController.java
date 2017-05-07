@@ -90,6 +90,44 @@ public class ThreadController {
         System.out.println("hejka jako klient");
     }
 
+    public ThreadController(Socket socket) throws IOException {
+        role = "server";
+//        Connect0(addr, port);
+        System.out.println("hejka jako serwer");
+
+        Runnable runnable = new Runnable() {
+            public synchronized void run() {
+                while (true) {
+                    try {
+                        netOut = new PrintWriter(socket.getOutputStream(),true);
+                        BufferedReader netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                        String input = null;
+
+                        input = netIn.readLine();
+
+                        if(input == null) {
+                            System.out.println("Client disconnected from server");
+                            break;
+                        }
+
+                        final String msgbody = input;
+                        System.out.println("Server 0 got: " + input + " from " + socket.getInetAddress());
+
+
+                        Platform.runLater(() -> addMsg(msgbody));
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }
+        };
+        new Thread(runnable).start();
+    }
+
     @FXML
     public void Connect0(String addr, Integer port) throws IOException {
         Runnable runnable = () -> {
@@ -106,8 +144,10 @@ public class ThreadController {
                     String input = netIn.readLine();
                     final String msgbody = input;
 
-                    if(input == null)
+                    if(input == null) {
+                        System.out.println("Server disconnected from client");
                         break;
+                    }
 
                     Platform.runLater(() -> addMsg(msgbody));
                     System.out.println("Client 0 got: " + input);

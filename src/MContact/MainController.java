@@ -21,12 +21,7 @@ import java.net.SocketException;
 import java.util.Optional;
 
 public class MainController {
-    private ThreadModel threadModel;
-    private PrintWriter netOut;
-    private BufferedReader netIn;
-    private Boolean threadopened = false;
-    ThreadView threadView;
-    private ThreadController threadController;
+    private MainModel mainModel;
 
     @FXML
     private Label nameLabel;
@@ -36,14 +31,14 @@ public class MainController {
 
     public MainController() throws IOException {
         System.out.println("hejka z glownego controllera");
-        threadModel = new ThreadModel();
+        mainModel = new MainModel();
         Server0();
     }
 
     @FXML
     void initialize() {
-        nameLabel.setText("Hello " + threadModel.name + "!");
-        portLabel.setText("You are listening on port " + threadModel.serverPort);
+        nameLabel.setText("Hello " + mainModel.name + "!");
+        portLabel.setText("You are listening on port " + mainModel.serverPort);
     }
 
     @FXML
@@ -82,11 +77,11 @@ public class MainController {
         Optional<Pair<String, String>> result = dialog.showAndWait();
 
         result.ifPresent(ipPort -> {
-            threadopened = true;
             Stage stage = new Stage();
             try {
-                threadController = new ThreadController(ipPort.getKey(), Integer.parseInt(ipPort.getValue()));
-                threadView = new ThreadView(stage, threadModel.name, threadController);
+                ThreadController threadController = new ThreadController(ipPort.getKey(), Integer.parseInt(ipPort.getValue()));
+                /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
+                new ThreadView(stage, mainModel.name, threadController);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -95,12 +90,11 @@ public class MainController {
         });
     }
 
-    private void openNewThread(String msg) throws IOException{
-        threadopened = true;
+    private void openNewThread(Socket socket) throws IOException{
         Stage stage = new Stage();
-        threadController = new ThreadController(netOut);
-        threadView = new ThreadView(stage, threadModel.name, threadController);
-        Platform.runLater(() -> threadController.addMsg(msg));
+        ThreadController threadController = new ThreadController(socket);
+        /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
+        new ThreadView(stage, mainModel.name, threadController);
     }
 
     public void Server0() throws IOException {
@@ -114,47 +108,13 @@ public class MainController {
                     final Socket clientSocket = serverSocket.accept();
                     System.out.println("Client connected to server 0 from " + clientSocket.getInetAddress());
 
-                    Runnable runnable = new Runnable() {
-                        public synchronized void run() {
-                            while (true) {
-                                try {
-                                    netOut = new PrintWriter(clientSocket.getOutputStream(),true);
-                                    netIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-                                    String input = null;
-
-                                    input = netIn.readLine();
-
-                                    if(input == null)
-                                        break;
-
-                                    final String msgbody = input;
-                                    System.out.println("Server 0 got: " + input + " from " + clientSocket.getInetAddress());
-
-                                    if(!threadopened) {
-                                        System.out.println("Opening new thread");
-                                        Platform.runLater(() -> {
-                                            try {
-                                                openNewThread(msgbody);
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            }
-                                        });
-                                    }
-                                    else {
-                                        Platform.runLater(() -> threadController.addMsg(msgbody));
-                                    }
-
-
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
-
-                            }
+                    Platform.runLater(() -> {
+                        try {
+                            openNewThread(clientSocket);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    };
-                    new Thread(runnable).start();
+                    });
                 }
 
             } catch (SocketException sx) {
