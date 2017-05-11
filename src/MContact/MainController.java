@@ -1,12 +1,14 @@
 package MContact;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.input.InputEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -22,12 +24,19 @@ import java.util.Optional;
 
 public class MainController {
     private MainModel mainModel;
+    private ServerSocket serverSocket;
 
     @FXML
     private Label nameLabel;
 
     @FXML
     private Label portLabel;
+
+    @FXML
+    private Button connectButton;
+
+    @FXML
+    private Button exitButton;
 
     public MainController() throws IOException {
         System.out.println("hejka z glownego controllera");
@@ -39,6 +48,25 @@ public class MainController {
     void initialize() {
         nameLabel.setText("Hello " + mainModel.name + "!");
         portLabel.setText("You are listening on port " + mainModel.serverPort);
+        connectButton.setOnAction((e) -> {
+            try {
+                ConnectButtonClicked();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        });
+
+        exitButton.setOnAction((e) -> {
+            System.out.println("closing app");
+            exitButtonClicked(e);
+        });
+    }
+
+    @FXML void exitButtonClicked(ActionEvent e) {
+        final Node source = (Node) e.getSource();
+        final Stage stage = (Stage) source.getScene().getWindow();
+        stage.close();
+        closingMainWindow();
     }
 
     @FXML
@@ -97,11 +125,20 @@ public class MainController {
         new ThreadView(stage, mainModel.name, threadController);
     }
 
+    public void closingMainWindow() {
+        System.out.println("closing main server");
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void Server0() throws IOException {
         Runnable serverLoop = () -> {
             System.out.println("Starting server 0");
             try {
-                ServerSocket serverSocket = new ServerSocket(8420);
+                serverSocket = new ServerSocket(8420);
 
                 while (true) {
                     // block until we get a connection from a client
@@ -118,7 +155,7 @@ public class MainController {
                 }
 
             } catch (SocketException sx) {
-                System.out.println("Socket SERVER0 closed, user has shutdown the connection, or network has failed");
+                System.out.println("Socket SERVER0 (MAIN) closed, user has shutdown the connection, or network has failed");
             } catch (IOException ex) {
                 System.out.println(ex.getMessage() + ex);
             } catch (Exception ex){

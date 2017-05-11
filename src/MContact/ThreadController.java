@@ -47,6 +47,7 @@ public class ThreadController {
 
 
     private String role;
+    private Socket socket;
 
     @FXML
     public void sendMessage() {
@@ -81,24 +82,32 @@ public class ThreadController {
     public ThreadController(PrintWriter out) throws IOException {
         netOut = out;
         role = "server";
+        Platform.runLater(() -> addMsg("Server"));
         System.out.println("hejka z serwera");
     }
 
     public ThreadController(String addr, Integer port) throws IOException {
         role = "client";
         Connect0(addr, port);
+        Platform.runLater(() -> addMsg("Client"));
         System.out.println("hejka jako klient");
     }
 
-    public ThreadController(Socket socket) throws IOException {
+    public ThreadController(Socket _socket) throws IOException {
         role = "server";
 //        Connect0(addr, port);
+        Platform.runLater(() -> addMsg("Server"));
         System.out.println("hejka jako serwer");
+
+        socket=_socket;
 
         Runnable runnable = new Runnable() {
             public synchronized void run() {
                 while (true) {
                     try {
+                        if(socket.isClosed())
+                            break;
+
                         netOut = new PrintWriter(socket.getOutputStream(),true);
                         BufferedReader netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -107,6 +116,7 @@ public class ThreadController {
                         input = netIn.readLine();
 
                         if(input == null) {
+                            Platform.runLater(() -> addMsg("Partner disconnected."));
                             System.out.println("Client disconnected from server");
                             break;
                         }
@@ -117,8 +127,13 @@ public class ThreadController {
 
                         Platform.runLater(() -> addMsg(msgbody));
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } catch (SocketException sx) {
+                        System.out.println("Socket SERVER0 (in Client) closed, user has shutdown the connection, or network has failed");
+//                        sx.printStackTrace();
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage() + ex);
+                    } catch (Exception ex) {
+                        System.out.println(ex.getMessage() + ex);
                     }
 
 
@@ -128,12 +143,21 @@ public class ThreadController {
         new Thread(runnable).start();
     }
 
+    public void closingWindow() {
+        System.out.println("closing controller");
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     public void Connect0(String addr, Integer port) throws IOException {
         Runnable runnable = () -> {
 
             try {
-                Socket socket = new Socket(addr, port);
+                socket = new Socket(addr, port);
 
                 // loop forever, or until the server closes the connection
                 while (true) {
@@ -145,6 +169,7 @@ public class ThreadController {
                     final String msgbody = input;
 
                     if(input == null) {
+                        Platform.runLater(() -> addMsg("Partner disconnected."));
                         System.out.println("Server disconnected from client");
                         break;
                     }
@@ -154,7 +179,7 @@ public class ThreadController {
                 }
             } catch (SocketException sx) {
                 System.out.println("Socket CLIENT0 closed, user has shutdown the connection, or network has failed");
-                sx.printStackTrace();
+//                sx.printStackTrace();
             } catch (IOException ex) {
                 System.out.println(ex.getMessage() + ex);
             } catch (Exception ex) {

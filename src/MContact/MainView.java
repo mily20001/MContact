@@ -8,8 +8,11 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 class MainView {
-    public MainView(Stage stage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("MainView.fxml"));
+    public MainView(Stage stage, MainController mainController) throws IOException {
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("MainView.fxml"));
+        loader.setController(mainController);
+        loader.setClassLoader(getClass().getClassLoader());
+        Parent root = loader.load();
 
         stage.setTitle("MContact Main");
         stage.setMinHeight(100);
@@ -20,5 +23,8 @@ class MainView {
 
         stage.setScene(scene);
         stage.show();
+        stage.toFront();
+
+        stage.setOnCloseRequest(we -> mainController.closingMainWindow());
     }
 }

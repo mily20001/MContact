@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="350.0" styleClass="mainWindow" stylesheets="@MainStyle.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MContact.MainController">
+<GridPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="350.0" styleClass="mainWindow" stylesheets="@MainStyle.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="144.0" minWidth="10.0" prefWidth="78.0" />
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="182.0" minWidth="10.0" prefWidth="105.0" />
@@ -22,10 +22,10 @@
    <children>
       <Label fx:id="nameLabel" prefHeight="19.0" prefWidth="350.0" styleClass="nameLabel" stylesheets="@MainStyle.css" text="Hello John!" GridPane.columnSpan="4" />
       <Label fx:id="portLabel" prefHeight="19.0" prefWidth="350.0" styleClass="portLabel" stylesheets="@MainStyle.css" text="You are listening on port 8420" GridPane.columnSpan="4" GridPane.rowIndex="1" />
-      <Button mnemonicParsing="false" onAction="#ConnectButtonClicked" styleClass="mainButton" stylesheets="@MainStyle.css" text="Connect" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+      <Button fx:id="connectButton" mnemonicParsing="false" styleClass="mainButton" stylesheets="@MainStyle.css" text="Connect" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
       <Button mnemonicParsing="false" styleClass="mainButton" stylesheets="@MainStyle.css" text="Change port" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
       <Button mnemonicParsing="false" styleClass="mainButton" stylesheets="@MainStyle.css" text="Change name" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
-      <Button mnemonicParsing="false" styleClass="mainButton" stylesheets="@MainStyle.css" text="Exit" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+      <Button fx:id="exitButton" mnemonicParsing="false" styleClass="mainButton" stylesheets="@MainStyle.css" text="Exit" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
    </children>
    <padding>
       <Insets left="5.0" right="5.0" />

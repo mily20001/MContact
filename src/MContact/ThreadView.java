@@ -1,5 +1,6 @@
 package MContact;
 
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -11,6 +12,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -87,5 +89,7 @@ class ThreadView {
         stage.setScene(scene);
         stage.show();
         stage.toFront();
+
+        stage.setOnCloseRequest(we -> threadController.closingWindow());
     }
 }
