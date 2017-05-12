@@ -15,8 +15,14 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.util.Objects;
 
 class ThreadView {
+
+    static HBox addMsg(Message msg, boolean your, Double threadBoxWidth, ScrollPane threadPane) {
+        String details = msg.author + ", " + msg.getDateString();
+        return addMsg(msg.body, details, your, threadBoxWidth, threadPane);
+    }
 
     static HBox addMsg(String body, String details, boolean your, Double threadBoxWidth, ScrollPane threadPane) {
         HBox msg = new HBox();

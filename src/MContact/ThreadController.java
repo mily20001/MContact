@@ -14,6 +14,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,18 +58,34 @@ public class ThreadController {
             return;
         }
 
-        threadBox.getChildren().add(ThreadView.addMsg(body, "17.09.2017", true, threadBox.getWidth(), threadPane));
+        Message msg = new Message(body, "You");
 
-        netOut.println(body);
+        System.out.println(msg.toJSON());
+
+        threadBox.getChildren().add(ThreadView.addMsg(msg, true, threadBox.getWidth(), threadPane));
+
+//        threadBox.getChildren().add(ThreadView.addMsg(body, "17.09.2017", true, threadBox.getWidth(), threadPane));
+
+        netOut.println(msg.toJSON());
 
         inputArea.setText("");
 
     }
 
     @FXML
-    public void addMsg(String body) {
+    public void addMsg(String json) {
+        Message msg = new Message(json);
+        String body = msg.body;
         System.out.println("Adding message: "+body);
-        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(body, "16.09.2017", false, threadBox.getWidth(), threadPane)));
+//        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(body, "16.09.2017", false, threadBox.getWidth(), threadPane)));
+        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(msg, false, threadBox.getWidth(), threadPane)));
+    }
+
+    @FXML
+    public void addInfoMsg(String body) {
+        Message msg = new Message(body, "Internal");
+//        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(body, "16.09.2017", false, threadBox.getWidth(), threadPane)));
+        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(msg, false, threadBox.getWidth(), threadPane)));
     }
 
     @FXML
@@ -82,21 +99,21 @@ public class ThreadController {
     public ThreadController(PrintWriter out) throws IOException {
         netOut = out;
         role = "server";
-        Platform.runLater(() -> addMsg("Server"));
+        Platform.runLater(() -> addInfoMsg("Server"));
         System.out.println("hejka z serwera");
     }
 
     public ThreadController(String addr, Integer port) throws IOException {
         role = "client";
         Connect0(addr, port);
-        Platform.runLater(() -> addMsg("Client"));
+        Platform.runLater(() -> addInfoMsg("Client"));
         System.out.println("hejka jako klient");
     }
 
     public ThreadController(Socket _socket) throws IOException {
         role = "server";
 //        Connect0(addr, port);
-        Platform.runLater(() -> addMsg("Server"));
+        Platform.runLater(() -> addInfoMsg("Server"));
         System.out.println("hejka jako serwer");
 
         socket=_socket;
@@ -116,7 +133,7 @@ public class ThreadController {
                         input = netIn.readLine();
 
                         if(input == null) {
-                            Platform.runLater(() -> addMsg("Partner disconnected."));
+                            Platform.runLater(() -> addInfoMsg("Partner disconnected."));
                             System.out.println("Client disconnected from server");
                             break;
                         }
@@ -169,7 +186,7 @@ public class ThreadController {
                     final String msgbody = input;
 
                     if(input == null) {
-                        Platform.runLater(() -> addMsg("Partner disconnected."));
+                        Platform.runLater(() -> addInfoMsg("Partner disconnected."));
                         System.out.println("Server disconnected from client");
                         break;
                     }
