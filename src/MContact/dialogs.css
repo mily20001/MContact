@@ -1,0 +1,44 @@
+.connectDialog {
+    -fx-background-color: #383838;
+    -fx-stroke: green;
+}
+
+.connectDialog > *.button-bar > *.container{
+    -fx-background-color: #383838;
+}
+.connectDialog > *.label.content{
+    -fx-text-fill: white;
+}
+.connectDialog:header *.header-panel{
+    -fx-background-color: #383838;
+}
+.connectDialog:header *.header-panel *.label{
+    -fx-text-fill: white;
+}
+
+.connectDialog .button{
+    -fx-base: #404040;
+    -fx-text-fill: white;
+}
+
+.connectDialog .text-field{
+    -fx-background-color: #303030;
+    -fx-text-fill: white;
+}
+
+.connectDialog .label{
+    -fx-text-fill: white;
+}
+
+.errorAlert{
+    -fx-background-color: #383838;
+}
+
+.errorAlert .label{
+    -fx-text-fill: white;
+}
+
+.errorAlert .button{
+    -fx-base: #404040;
+    -fx-text-fill: white;
+}

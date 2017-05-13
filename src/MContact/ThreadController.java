@@ -20,10 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.CookieHandler;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 
 public class ThreadController {
     @FXML
@@ -46,8 +43,6 @@ public class ThreadController {
 
     private PrintWriter netOut;
 
-
-    private String role;
     private Socket socket;
 
     @FXML
@@ -64,8 +59,6 @@ public class ThreadController {
 
         threadBox.getChildren().add(ThreadView.addMsg(msg, true, threadBox.getWidth(), threadPane));
 
-//        threadBox.getChildren().add(ThreadView.addMsg(body, "17.09.2017", true, threadBox.getWidth(), threadPane));
-
         netOut.println(msg.toJSON());
 
         inputArea.setText("");
@@ -77,14 +70,12 @@ public class ThreadController {
         Message msg = new Message(json);
         String body = msg.body;
         System.out.println("Adding message: "+body);
-//        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(body, "16.09.2017", false, threadBox.getWidth(), threadPane)));
         Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(msg, false, threadBox.getWidth(), threadPane)));
     }
 
     @FXML
     public void addInfoMsg(String body) {
         Message msg = new Message(body, "Internal");
-//        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(body, "16.09.2017", false, threadBox.getWidth(), threadPane)));
         Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(msg, false, threadBox.getWidth(), threadPane)));
     }
 
@@ -96,25 +87,7 @@ public class ThreadController {
         }
     }
 
-    public ThreadController(PrintWriter out) throws IOException {
-        netOut = out;
-        role = "server";
-        Platform.runLater(() -> addInfoMsg("Server"));
-        System.out.println("hejka z serwera");
-    }
-
-    public ThreadController(String addr, Integer port) throws IOException {
-        role = "client";
-        Connect0(addr, port);
-        Platform.runLater(() -> addInfoMsg("Client"));
-        System.out.println("hejka jako klient");
-    }
-
     public ThreadController(Socket _socket) throws IOException {
-        role = "server";
-//        Connect0(addr, port);
-        Platform.runLater(() -> addInfoMsg("Server"));
-        System.out.println("hejka jako serwer");
 
         socket=_socket;
 
@@ -141,12 +114,10 @@ public class ThreadController {
                         final String msgbody = input;
                         System.out.println("Server 0 got: " + input + " from " + socket.getInetAddress());
 
-
                         Platform.runLater(() -> addMsg(msgbody));
 
                     } catch (SocketException sx) {
                         System.out.println("Socket SERVER0 (in Client) closed, user has shutdown the connection, or network has failed");
-//                        sx.printStackTrace();
                     } catch (IOException ex) {
                         System.out.println(ex.getMessage() + ex);
                     } catch (Exception ex) {
@@ -167,49 +138,6 @@ public class ThreadController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @FXML
-    public void Connect0(String addr, Integer port) throws IOException {
-        Runnable runnable = () -> {
-
-            try {
-                socket = new Socket(addr, port);
-
-                // loop forever, or until the server closes the connection
-                while (true) {
-
-                    netOut = new PrintWriter(socket.getOutputStream(),true);
-                    BufferedReader netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-                    String input = netIn.readLine();
-                    final String msgbody = input;
-
-                    if(input == null) {
-                        Platform.runLater(() -> addInfoMsg("Partner disconnected."));
-                        System.out.println("Server disconnected from client");
-                        break;
-                    }
-
-                    Platform.runLater(() -> addMsg(msgbody));
-                    System.out.println("Client 0 got: " + input);
-                }
-            } catch (SocketException sx) {
-                System.out.println("Socket CLIENT0 closed, user has shutdown the connection, or network has failed");
-//                sx.printStackTrace();
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage() + ex);
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage() + ex);
-            } finally {
-
-            }
-        };
-
-        new Thread(runnable).start();
-
-
-        System.out.println("Client 0 connected");
     }
 
     private static void slowScrollToBottom(ScrollPane scrollPane) {

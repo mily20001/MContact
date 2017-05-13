@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Optional;
 
 public class MainController {
@@ -73,6 +74,11 @@ public class MainController {
     public void ConnectButtonClicked() throws IOException {
 
         Dialog<Pair<String, String>> dialog = new Dialog<>();
+
+        dialog.getDialogPane().getStylesheets().add(
+                getClass().getResource("dialogs.css").toExternalForm());
+        dialog.getDialogPane().getStyleClass().add("connectDialog");
+
         dialog.setTitle("Connect to user");
         dialog.setHeaderText("Enter user ip address and port");
         ButtonType loginButtonType = new ButtonType("Connect", ButtonBar.ButtonData.OK_DONE);
@@ -105,16 +111,39 @@ public class MainController {
         Optional<Pair<String, String>> result = dialog.showAndWait();
 
         result.ifPresent(ipPort -> {
+            System.out.println("Connecting to " + ipPort.getKey() + ":" + ipPort.getValue());
             Stage stage = new Stage();
             try {
-                ThreadController threadController = new ThreadController(ipPort.getKey(), Integer.parseInt(ipPort.getValue()));
+                Socket tmpSocket = new Socket(ipPort.getKey(), Integer.parseInt(ipPort.getValue()));
+
+                ThreadController threadController = new ThreadController(tmpSocket);
                 /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
                 new ThreadView(stage, mainModel.name, threadController);
+
+            }catch (UnknownHostException e) {
+                System.out.println("Wrong addresSSs");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.getDialogPane().getStylesheets().add(
+                        getClass().getResource("dialogs.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("errorAlert");
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Could not connect to " + ipPort.getKey() + ":" + ipPort.getValue());
+                alert.showAndWait();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            System.out.println("Connecting to " + ipPort.getKey() + ":" + ipPort.getValue());
+            catch (NumberFormatException e) {
+                System.out.println("Wrong port format");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.getDialogPane().getStylesheets().add(
+                        getClass().getResource("dialogs.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("errorAlert");
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Port " + ipPort.getValue() + " is invalid.");
+                alert.showAndWait();
+            }
         });
     }
 
