@@ -45,6 +45,8 @@ public class ThreadController {
 
     private Socket socket;
 
+    private String yourName;
+
     @FXML
     public void sendMessage() {
 
@@ -53,7 +55,7 @@ public class ThreadController {
             return;
         }
 
-        Message msg = new Message(body, "You");
+        Message msg = new Message(body, yourName);
 
         System.out.println(msg.toJSON());
 
@@ -87,8 +89,9 @@ public class ThreadController {
         }
     }
 
-    public ThreadController(Socket _socket) throws IOException {
+    public ThreadController(Socket _socket, String _yourName) throws IOException {
 
+        yourName = _yourName;
         socket=_socket;
 
         Runnable runnable = new Runnable() {

@@ -25,7 +25,6 @@ import java.util.Optional;
 
 public class MainController {
     private MainModel mainModel;
-    private ServerSocket serverSocket;
 
     @FXML
     private Label nameLabel;
@@ -39,16 +38,22 @@ public class MainController {
     @FXML
     private Button exitButton;
 
+    @FXML
+    private Button changePortButton;
+
+    @FXML
+    private Button changeNameButton;
+
     public MainController() throws IOException {
         System.out.println("hejka z glownego controllera");
-        mainModel = new MainModel();
+        mainModel = new MainModel("John Smith", 8420);
         Server0();
     }
 
     @FXML
     void initialize() {
-        nameLabel.setText("Hello " + mainModel.name + "!");
-        portLabel.setText("You are listening on port " + mainModel.serverPort);
+        nameLabel.setText("Hello " + mainModel.getName() + "!");
+        portLabel.setText("You are listening on port " + mainModel.getServerPort());
         connectButton.setOnAction((e) -> {
             try {
                 ConnectButtonClicked();
@@ -61,6 +66,14 @@ public class MainController {
             System.out.println("closing app");
             exitButtonClicked(e);
         });
+
+        changePortButton.setOnAction((e) -> {
+            changePortButtonClicked();
+        });
+
+        changeNameButton.setOnAction((e) -> {
+            changeNameButtonClicked();
+        });
     }
 
     @FXML void exitButtonClicked(ActionEvent e) {
@@ -68,6 +81,53 @@ public class MainController {
         final Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
         closingMainWindow();
+    }
+
+    @FXML
+    void changePortButtonClicked() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Change your port");
+        dialog.setHeaderText("Change your port number");
+        dialog.setContentText("Enter new port number:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        try {
+            if (result.isPresent()) {
+                mainModel.setServerPort(Integer.parseInt(result.get()));
+                portLabel.setText("You are listening on port " + mainModel.getServerPort());
+                mainModel.getServerSocket().close();
+                Server0();
+            }
+        }
+        catch (NumberFormatException e) {
+            System.out.println("Wrong port format");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.getDialogPane().getStylesheets().add(
+                    getClass().getResource("dialogs.css").toExternalForm());
+            alert.getDialogPane().getStyleClass().add("errorAlert");
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Port " + result.get() + " is invalid.");
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void changeNameButtonClicked() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Change your name");
+        dialog.setHeaderText("Change your name");
+        dialog.setContentText("Enter new name:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            mainModel.setName(result.get());
+            nameLabel.setText("Hello " + mainModel.getName() + "!");
+        }
     }
 
     @FXML
@@ -116,9 +176,9 @@ public class MainController {
             try {
                 Socket tmpSocket = new Socket(ipPort.getKey(), Integer.parseInt(ipPort.getValue()));
 
-                ThreadController threadController = new ThreadController(tmpSocket);
+                ThreadController threadController = new ThreadController(tmpSocket, mainModel.getName());
                 /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
-                new ThreadView(stage, mainModel.name, threadController);
+                new ThreadView(stage, mainModel.getName(), threadController);
 
             }catch (UnknownHostException e) {
                 System.out.println("Wrong addresSSs");
@@ -149,15 +209,15 @@ public class MainController {
 
     private void openNewThread(Socket socket) throws IOException{
         Stage stage = new Stage();
-        ThreadController threadController = new ThreadController(socket);
+        ThreadController threadController = new ThreadController(socket, mainModel.getName());
         /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
-        new ThreadView(stage, mainModel.name, threadController);
+        new ThreadView(stage, mainModel.getName(), threadController);
     }
 
     public void closingMainWindow() {
         System.out.println("closing main server");
         try {
-            serverSocket.close();
+            mainModel.getServerSocket().close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -167,11 +227,11 @@ public class MainController {
         Runnable serverLoop = () -> {
             System.out.println("Starting server 0");
             try {
-                serverSocket = new ServerSocket(8420);
+                mainModel.setServerSocket(new ServerSocket(mainModel.getServerPort()));
 
                 while (true) {
                     // block until we get a connection from a client
-                    final Socket clientSocket = serverSocket.accept();
+                    final Socket clientSocket = mainModel.getServerSocket().accept();
                     System.out.println("Client connected to server 0 from " + clientSocket.getInetAddress());
 
                     Platform.runLater(() -> {
@@ -189,6 +249,9 @@ public class MainController {
                 System.out.println(ex.getMessage() + ex);
             } catch (Exception ex){
                 System.out.println(ex.getMessage() + ex);
+            }
+            finally {
+                System.out.println("MAIN SERVER CLOSED");
             }
 
         };

@@ -85,7 +85,7 @@ class ThreadView {
         loader.setClassLoader(getClass().getClassLoader());
         Parent root = loader.load();
 
-        stage.setTitle("MContact - " + name);
+//        stage.setTitle("MContact - " + name);
         stage.setMinHeight(300);
         stage.setMinWidth(200);
         Scene scene = new Scene(root, 250, 350);
