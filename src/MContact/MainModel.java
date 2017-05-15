@@ -7,9 +7,9 @@ class MainModel {
     private Integer serverPort = 8420;
     private ServerSocket serverSocket;
 
-    public MainModel(String _name, Integer _port) {
-        name = _name;
-        serverPort = _port;
+    public MainModel(String name, Integer port) {
+        this.name = name;
+        this.serverPort = port;
     }
 
     public String getName() {

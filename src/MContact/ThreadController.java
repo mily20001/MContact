@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
+import java.util.Objects;
 
 public class ThreadController {
     @FXML
@@ -47,6 +48,8 @@ public class ThreadController {
 
     private String yourName;
 
+    private String partnerName;
+
     @FXML
     public void sendMessage() {
 
@@ -61,7 +64,11 @@ public class ThreadController {
 
         threadBox.getChildren().add(ThreadView.addMsg(msg, true, threadBox.getWidth(), threadPane));
 
-        netOut.println(msg.toJSON());
+        JSONObject obj = new JSONObject();
+        obj.put("type", "message");
+        obj.put("body", msg.toJSON());
+
+        netOut.println(obj.toString());
 
         inputArea.setText("");
 
@@ -89,10 +96,20 @@ public class ThreadController {
         }
     }
 
-    public ThreadController(Socket _socket, String _yourName) throws IOException {
+    private void handshake() {
+        JSONObject obj = new JSONObject();
+        obj.put("type", "name");
+        obj.put("body", yourName);
+        netOut.println(obj.toString());
+    }
 
-        yourName = _yourName;
-        socket=_socket;
+    public ThreadController(Socket socket, String yourName) throws IOException {
+
+        this.yourName = yourName;
+        this.socket = socket;
+        netOut = new PrintWriter(socket.getOutputStream(),true);
+
+        handshake();
 
         Runnable runnable = new Runnable() {
             public synchronized void run() {
@@ -101,7 +118,6 @@ public class ThreadController {
                         if(socket.isClosed())
                             break;
 
-                        netOut = new PrintWriter(socket.getOutputStream(),true);
                         BufferedReader netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                         String input = null;
@@ -114,10 +130,21 @@ public class ThreadController {
                             break;
                         }
 
-                        final String msgbody = input;
-                        System.out.println("Server 0 got: " + input + " from " + socket.getInetAddress());
+                        JSONObject parsedMsg = new JSONObject(input);
+                        String msgType = parsedMsg.getString("type");
 
-                        Platform.runLater(() -> addMsg(msgbody));
+                        if(Objects.equals(msgType, "name")) {
+                            System.out.println("Got partner name: " + parsedMsg.getString("body"));
+                            partnerName = parsedMsg.getString("body");
+                            nameLabel.setText("Talking with " + parsedMsg.getString("body"));
+                        }
+                        else if(Objects.equals(msgType, "message")) {
+
+                            final String msgJSON = parsedMsg.getString("body");
+//                            System.out.println("Server 0 got: " + input + " from " + socket.getInetAddress());
+
+                            Platform.runLater(() -> addMsg(msgJSON));
+                        }
 
                     } catch (SocketException sx) {
                         System.out.println("Socket SERVER0 (in Client) closed, user has shutdown the connection, or network has failed");
@@ -152,7 +179,7 @@ public class ThreadController {
 
     @FXML
     void initialize() {
-        nameLabel.setText("John Smith");
+        nameLabel.setText("Talking with " + partnerName);
 
         threadBox.heightProperty().addListener((observable, oldValue, newValue) -> {
             slowScrollToBottom(threadPane);

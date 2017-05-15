@@ -251,7 +251,7 @@ public class MainController {
                 System.out.println(ex.getMessage() + ex);
             }
             finally {
-                System.out.println("MAIN SERVER CLOSED");
+              //  System.out.println("MAIN SERVER CLOSED");
             }
 
         };

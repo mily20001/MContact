@@ -13,16 +13,16 @@ public class Message {
     protected Date date;
     protected String author;
 
-    public Message(String _body, String _author) {
-        body = _body;
-        author = _author;
+    public Message(String body, String author) {
+        this.body = body;
+        this.author = author;
         date = new Date();
     }
 
-    public Message(String _body, String _author, Date _date) {
-        body = _body;
-        author = _author;
-        date = _date;
+    public Message(String body, String author, Date date) {
+        this.body = body;
+        this.author = author;
+        this.date = date;
     }
 
     public Message(String json) {
