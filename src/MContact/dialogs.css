@@ -42,3 +42,35 @@
     -fx-base: #404040;
     -fx-text-fill: white;
 }
+
+.inputDialog {
+    -fx-background-color: #383838;
+    -fx-stroke: green;
+}
+
+.inputDialog > *.button-bar > *.container{
+    -fx-background-color: #383838;
+}
+.inputDialog > *.label.content{
+    -fx-text-fill: white;
+}
+.inputDialog:header *.header-panel{
+    -fx-background-color: #383838;
+}
+.inputDialog:header *.header-panel *.label{
+    -fx-text-fill: white;
+}
+
+.inputDialog .button{
+    -fx-base: #404040;
+    -fx-text-fill: white;
+}
+
+.inputDialog .text-field{
+    -fx-background-color: #303030;
+    -fx-text-fill: white;
+}
+
+.inputDialog .label{
+    -fx-text-fill: white;
+}

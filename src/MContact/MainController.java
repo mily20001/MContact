@@ -90,6 +90,10 @@ public class MainController {
         dialog.setHeaderText("Change your port number");
         dialog.setContentText("Enter new port number:");
 
+        dialog.getDialogPane().getStylesheets().add(
+                getClass().getResource("dialogs.css").toExternalForm());
+        dialog.getDialogPane().getStyleClass().add("inputDialog");
+
         Optional<String> result = dialog.showAndWait();
 
         try {
@@ -121,6 +125,10 @@ public class MainController {
         dialog.setTitle("Change your name");
         dialog.setHeaderText("Change your name");
         dialog.setContentText("Enter new name:");
+
+        dialog.getDialogPane().getStylesheets().add(
+                getClass().getResource("dialogs.css").toExternalForm());
+        dialog.getDialogPane().getStyleClass().add("inputDialog");
 
         Optional<String> result = dialog.showAndWait();
 
@@ -176,7 +184,7 @@ public class MainController {
             try {
                 Socket tmpSocket = new Socket(ipPort.getKey(), Integer.parseInt(ipPort.getValue()));
 
-                ThreadController threadController = new ThreadController(tmpSocket, mainModel.getName());
+                ThreadController threadController = new ThreadController(tmpSocket, mainModel.getName(), stage);
                 /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
                 new ThreadView(stage, mainModel.getName(), threadController);
 
@@ -209,7 +217,7 @@ public class MainController {
 
     private void openNewThread(Socket socket) throws IOException{
         Stage stage = new Stage();
-        ThreadController threadController = new ThreadController(socket, mainModel.getName());
+        ThreadController threadController = new ThreadController(socket, mainModel.getName(), stage);
         /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
         new ThreadView(stage, mainModel.getName(), threadController);
     }

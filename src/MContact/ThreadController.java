@@ -13,6 +13,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.json.JSONObject;
 
@@ -48,7 +49,9 @@ public class ThreadController {
 
     private String yourName;
 
-    private String partnerName;
+    private String partnerName=null;
+
+    private Stage threadStage;
 
     @FXML
     public void sendMessage() {
@@ -103,10 +106,11 @@ public class ThreadController {
         netOut.println(obj.toString());
     }
 
-    public ThreadController(Socket socket, String yourName) throws IOException {
+    public ThreadController(Socket socket, String yourName, Stage stage) throws IOException {
 
         this.yourName = yourName;
         this.socket = socket;
+        this.threadStage = stage;
         netOut = new PrintWriter(socket.getOutputStream(),true);
 
         handshake();
@@ -137,6 +141,7 @@ public class ThreadController {
                             System.out.println("Got partner name: " + parsedMsg.getString("body"));
                             partnerName = parsedMsg.getString("body");
                             nameLabel.setText("Talking with " + parsedMsg.getString("body"));
+                            threadStage.setTitle(parsedMsg.getString("body"));
                         }
                         else if(Objects.equals(msgType, "message")) {
 
@@ -179,7 +184,6 @@ public class ThreadController {
 
     @FXML
     void initialize() {
-        nameLabel.setText("Talking with " + partnerName);
 
         threadBox.heightProperty().addListener((observable, oldValue, newValue) -> {
             slowScrollToBottom(threadPane);
@@ -188,5 +192,10 @@ public class ThreadController {
         inputArea.setOnKeyPressed(this::inputAreaKeyPressed);
         inputArea.setOnKeyReleased(this::inputAreaKeyPressed);
         sendButton.setOnAction((e) -> sendMessage());
+        if(partnerName!=null)
+        {
+            nameLabel.setText("Talking with " + partnerName);
+            threadStage.setTitle(partnerName);
+        }
     }
 }
