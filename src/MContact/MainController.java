@@ -11,10 +11,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -216,7 +213,7 @@ public class MainController {
                 ThreadController threadController = new ThreadController(tmpSocket, mainModel.getName(), stage);
                 new ThreadView(stage, threadController);
 
-            }catch (UnknownHostException e) {
+            }catch (UnknownHostException | ConnectException e) {
                 System.out.println("Wrong addresSSs");
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.getDialogPane().getStylesheets().add(
