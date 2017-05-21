@@ -2,3 +2,4 @@
 .idea/
 out/
 hs_err*.log
+config.cfg

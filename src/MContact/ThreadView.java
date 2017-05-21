@@ -1,6 +1,5 @@
 package MContact;
 
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -12,10 +11,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
-import java.util.Objects;
 
 class ThreadView {
 
@@ -36,9 +33,9 @@ class ThreadView {
 
         msgBody.setFont(msgBody.getFont());
         double msgBodyWidth = msgBody.getBoundsInLocal().getWidth();
-        System.out.println("text width: "+ msgBodyWidth);
+//        System.out.println("text width: "+ msgBodyWidth);
         if(msgBodyWidth > threadBoxWidth - 15) {
-            System.out.println("will be wrapped");
+//            System.out.println("will be wrapped");
             msgBody.setWrappingWidth(threadBoxWidth - 15);
         } else {
             msgBody.setWrappingWidth(msgBodyWidth + 5);
@@ -79,13 +76,12 @@ class ThreadView {
         return msg;
     }
 
-    public ThreadView(Stage stage, String name, ThreadController threadController) throws IOException {
+    public ThreadView(Stage stage, ThreadController threadController) throws IOException {
         FXMLLoader loader= new FXMLLoader(getClass().getResource("ThreadView.fxml"));
         loader.setController(threadController);
         loader.setClassLoader(getClass().getClassLoader());
         Parent root = loader.load();
 
-//        stage.setTitle("MContact - " + name);
         stage.setMinHeight(300);
         stage.setMinWidth(200);
         Scene scene = new Scene(root, 250, 350);

@@ -17,11 +17,15 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.json.JSONObject;
 
+import javax.crypto.SecretKey;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.*;
+import java.net.Socket;
+import java.net.SocketException;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Objects;
 
 public class ThreadController {
@@ -43,15 +47,7 @@ public class ThreadController {
     @FXML
     private ScrollPane threadPane;
 
-    private PrintWriter netOut;
-
-    private Socket socket;
-
-    private String yourName;
-
-    private String partnerName=null;
-
-    private Stage threadStage;
+    private ThreadModel threadModel;
 
     @FXML
     public void sendMessage() {
@@ -61,17 +57,16 @@ public class ThreadController {
             return;
         }
 
-        Message msg = new Message(body, yourName);
+        Message msg = new Message(body, threadModel.getYourName());
 
         System.out.println(msg.toJSON());
 
         threadBox.getChildren().add(ThreadView.addMsg(msg, true, threadBox.getWidth(), threadPane));
 
         JSONObject obj = new JSONObject();
-        obj.put("type", "message");
         obj.put("body", msg.toJSON());
 
-        netOut.println(obj.toString());
+        sendObject("message", obj);
 
         inputArea.setText("");
 
@@ -81,7 +76,7 @@ public class ThreadController {
     public void addMsg(String json) {
         Message msg = new Message(json);
         String body = msg.body;
-        System.out.println("Adding message: "+body);
+//        System.out.println("Adding message: "+body);
         Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(msg, false, threadBox.getWidth(), threadPane)));
     }
 
@@ -99,68 +94,133 @@ public class ThreadController {
         }
     }
 
+    // data should be in ASCII
+    private void sendData(String type, String data) {
+        try {
+            JSONObject finalObj = new JSONObject();
+            finalObj.put("type", type);
+            finalObj.put("data", data);
+
+            String finalData = new String (Base64.getEncoder().encode(finalObj.toString().getBytes("US-ASCII")));
+            threadModel.getNetOut().println(finalData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //encrypt and stringify object
+    private void sendObject(String type, JSONObject obj) {
+        try {
+            String data = new String (Base64.getEncoder().encode(obj.toString().getBytes("UTF-8")));
+            data = threadModel.encrypt(data);
+            sendData(type, data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private void handshake() {
         JSONObject obj = new JSONObject();
-        obj.put("type", "name");
-        obj.put("body", yourName);
-        netOut.println(obj.toString());
+        obj.put("body", threadModel.getYourName());
+
+        sendObject("name", obj);
+    }
+
+    private void getData(String input) {
+
+        input = new String(Base64.getDecoder().decode(input));
+
+        JSONObject finalMsg = new JSONObject(input);
+        String msgType = finalMsg.getString("type");
+
+        //only these two are sent directly (data is not an json object)
+        if(Objects.equals(msgType, "rsa") || Objects.equals(msgType, "aes")){
+            if(Objects.equals(msgType, "rsa")) {
+                System.out.println("Partner RSA key: " + finalMsg.getString("data"));
+                threadModel.setPartnerRSAkey(finalMsg.getString("data"));
+
+                sendAESKey(threadModel.getAESKey());
+            }
+
+            else if(Objects.equals(msgType, "aes")) {
+                threadModel.setPartnerAESkey(finalMsg.getString("data"));
+                System.out.println("Partner AES key: " + new String(Base64.getEncoder().encode(threadModel.getPartnerAESkey().getEncoded())));
+                handshake();
+            }
+        }
+        else {
+            String decryptedString = threadModel.decrypt(finalMsg.getString("data"));
+            String parsedString = new String(Base64.getDecoder().decode(decryptedString));
+            JSONObject parsedMsg = new JSONObject(parsedString);
+
+
+            if (Objects.equals(msgType, "name")) {
+                System.out.println("Got partner name: " + parsedMsg.getString("body"));
+                threadModel.setPartnerName(parsedMsg.getString("body"));
+                Platform.runLater(() -> nameLabel.setText("Talking with " + parsedMsg.getString("body")));
+
+                Platform.runLater(() -> threadModel.getThreadStage().setTitle(parsedMsg.getString("body")));
+            } else if (Objects.equals(msgType, "message")) {
+                final String msgJSON = parsedMsg.getString("body");
+
+                Platform.runLater(() -> addMsg(msgJSON));
+            } else {
+                System.out.println("Unknown message type");
+            }
+        }
+    }
+
+    private void sendRSAKey(PublicKey key) {
+        System.out.println("Your RSA public key: " + new String(Base64.getEncoder().encode(key.getEncoded())));
+        sendData("rsa", new String(Base64.getEncoder().encode(key.getEncoded())));
+    }
+
+    private void sendAESKey(SecretKey key) {
+        byte[] plainKey = key.getEncoded();
+
+        byte[] encryptedKey = RSA.encrypt(plainKey, threadModel.getPartnerRSAkey());
+
+        sendData("aes", new String(Base64.getEncoder().encode(encryptedKey)));
     }
 
     public ThreadController(Socket socket, String yourName, Stage stage) throws IOException {
+        threadModel = new ThreadModel(yourName, stage, socket, new PrintWriter(socket.getOutputStream(),true));
 
-        this.yourName = yourName;
-        this.socket = socket;
-        this.threadStage = stage;
-        netOut = new PrintWriter(socket.getOutputStream(),true);
+        sendRSAKey(threadModel.getPublicKey());
 
-        handshake();
+        Runnable runnable = () -> {
+            while (true) {
+                try {
+                    if(socket.isClosed())
+                        break;
 
-        Runnable runnable = new Runnable() {
-            public synchronized void run() {
-                while (true) {
-                    try {
-                        if(socket.isClosed())
-                            break;
+                    BufferedReader netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                        BufferedReader netIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String input = null;
 
-                        String input = null;
+                    input = netIn.readLine();
 
-                        input = netIn.readLine();
-
-                        if(input == null) {
-                            Platform.runLater(() -> addInfoMsg("Partner disconnected."));
-                            System.out.println("Client disconnected from server");
-                            break;
-                        }
-
-                        JSONObject parsedMsg = new JSONObject(input);
-                        String msgType = parsedMsg.getString("type");
-
-                        if(Objects.equals(msgType, "name")) {
-                            System.out.println("Got partner name: " + parsedMsg.getString("body"));
-                            partnerName = parsedMsg.getString("body");
-                            nameLabel.setText("Talking with " + parsedMsg.getString("body"));
-                            threadStage.setTitle(parsedMsg.getString("body"));
-                        }
-                        else if(Objects.equals(msgType, "message")) {
-
-                            final String msgJSON = parsedMsg.getString("body");
-//                            System.out.println("Server 0 got: " + input + " from " + socket.getInetAddress());
-
-                            Platform.runLater(() -> addMsg(msgJSON));
-                        }
-
-                    } catch (SocketException sx) {
-                        System.out.println("Socket SERVER0 (in Client) closed, user has shutdown the connection, or network has failed");
-                    } catch (IOException ex) {
-                        System.out.println(ex.getMessage() + ex);
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage() + ex);
+                    if(input == null) {
+                        Platform.runLater(() -> addInfoMsg("Partner disconnected."));
+                        System.out.println("Client disconnected from server");
+                        break;
                     }
 
+                    getData(input);
 
+                } catch (SocketException sx) {
+                    System.out.println("Socket SERVER0 (in Client) closed, user has shutdown the connection, or network has failed");
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage() + ex);
+                    ex.printStackTrace();
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage() + ex);
+                    ex.printStackTrace();
                 }
+
+
             }
         };
         new Thread(runnable).start();
@@ -169,7 +229,7 @@ public class ThreadController {
     public void closingWindow() {
         System.out.println("closing controller");
         try {
-            socket.close();
+            threadModel.getSocket().close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -192,10 +252,10 @@ public class ThreadController {
         inputArea.setOnKeyPressed(this::inputAreaKeyPressed);
         inputArea.setOnKeyReleased(this::inputAreaKeyPressed);
         sendButton.setOnAction((e) -> sendMessage());
-        if(partnerName!=null)
+        if(threadModel.getPartnerName()!=null)
         {
-            nameLabel.setText("Talking with " + partnerName);
-            threadStage.setTitle(partnerName);
+            nameLabel.setText("Talking with " + threadModel.getPartnerName());
+            threadModel.getThreadStage().setTitle(threadModel.getPartnerName());
         }
     }
 }

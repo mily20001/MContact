@@ -3,25 +3,20 @@ package MContact;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.input.InputEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.Properties;
 
 public class MainController {
     private MainModel mainModel;
@@ -44,9 +39,43 @@ public class MainController {
     @FXML
     private Button changeNameButton;
 
+    private void loadConfig() {
+        Properties props = new Properties();
+        InputStream is = null;
+
+        try {
+            File f = new File("config.cfg");
+            is = new FileInputStream( f );
+            props.load( is );
+        }
+        catch ( Exception e ) { is = null; }
+
+        String name = props.getProperty("Name", "John Smith");
+        Integer port = new Integer(props.getProperty("Port", "8080"));
+
+        mainModel = new MainModel(name, port);
+    }
+
+    private void saveConfig() {
+        try {
+            Properties props = new Properties();
+            props.setProperty("Name", mainModel.getName());
+            props.setProperty("Port", mainModel.getServerPort().toString());
+            File f = new File("config.cfg");
+            OutputStream out = new FileOutputStream( f );
+            props.store(out, "Mcontact settings");
+        }
+        catch (Exception e ) {
+            System.out.println("Error while saving config");
+            e.printStackTrace();
+        }
+    }
+
     public MainController() throws IOException {
         System.out.println("hejka z glownego controllera");
-        mainModel = new MainModel("John Smith", 8420);
+
+        loadConfig();
+
         Server0();
     }
 
@@ -185,8 +214,7 @@ public class MainController {
                 Socket tmpSocket = new Socket(ipPort.getKey(), Integer.parseInt(ipPort.getValue()));
 
                 ThreadController threadController = new ThreadController(tmpSocket, mainModel.getName(), stage);
-                /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
-                new ThreadView(stage, mainModel.getName(), threadController);
+                new ThreadView(stage, threadController);
 
             }catch (UnknownHostException e) {
                 System.out.println("Wrong addresSSs");
@@ -219,15 +247,18 @@ public class MainController {
         Stage stage = new Stage();
         ThreadController threadController = new ThreadController(socket, mainModel.getName(), stage);
         /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
-        new ThreadView(stage, mainModel.getName(), threadController);
+        new ThreadView(stage, threadController);
     }
 
     public void closingMainWindow() {
-        System.out.println("closing main server");
-        try {
-            mainModel.getServerSocket().close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        saveConfig();
+        if(!mainModel.getServerSocket().isClosed()) {
+            System.out.println("closing main server");
+            try {
+                mainModel.getServerSocket().close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
