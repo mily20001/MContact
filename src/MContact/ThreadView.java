@@ -1,22 +1,25 @@
 package MContact;
 
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Vector;
 
 class ThreadView {
+
+    public void detailsAlert(String yourHash, String partnerHash) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.getDialogPane().getStylesheets().add(
+                getClass().getResource("dialogs.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("errorAlert");
+        alert.setTitle("Connection details");
+        alert.setHeaderText(null);
+        alert.setContentText("Your AES hash: "+yourHash + "\nPartner AES hash: "+partnerHash);
+        alert.show();
+    }
 
     public ThreadView(Stage stage, ThreadController threadController) throws IOException {
         FXMLLoader loader= new FXMLLoader(getClass().getResource("ThreadView.fxml"));

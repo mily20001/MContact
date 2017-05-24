@@ -39,7 +39,7 @@ public class ThreadController {
     private Button sendButton;
 
     @FXML
-    private Button button1;
+    private Button detailsButton;
 
     @FXML
     private VBox threadBox;
@@ -92,6 +92,11 @@ public class ThreadController {
             sendMessage();
             e.consume();
         }
+    }
+
+    @FXML
+    public void displayDetails() {
+        threadView.detailsAlert(threadModel.getYourAESHash(), threadModel.getPartnerAESHash());
     }
 
     // data should be in ASCII
@@ -272,6 +277,6 @@ public class ThreadController {
             threadModel.getThreadStage().setTitle(threadModel.getPartnerName());
         }
 
-//        button1.setOnAction((e) -> threadView.changeAll("XDDDDDD"));
+        detailsButton.setOnAction((e) -> displayDetails());
     }
 }

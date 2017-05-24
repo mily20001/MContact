@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -61,6 +62,29 @@ class ThreadModel {
 
     SecretKey getAESKey() {
         return AESkey;
+    }
+
+    private String getAESHash(SecretKey key) {
+        String wyn = "";
+        try {
+            byte[] bytesOfMessage = key.getEncoded();
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] thedigest = md.digest(bytesOfMessage);
+            wyn = new String(Base64.getEncoder().encode(thedigest));
+            //delete all = from base64 code
+            wyn = wyn.replace("=", "");
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return wyn;
+    }
+
+    String getYourAESHash() {
+        return getAESHash(AESkey);
+    }
+
+    String getPartnerAESHash() {
+        return getAESHash(partnerAESkey);
     }
 
     void setPartnerAESkey(String key) {
