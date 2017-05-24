@@ -13,68 +13,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Vector;
 
 class ThreadView {
-
-    static HBox addMsg(Message msg, boolean your, Double threadBoxWidth, ScrollPane threadPane) {
-        String details = msg.author + ", " + msg.getDateString();
-        return addMsg(msg.body, details, your, threadBoxWidth, threadPane);
-    }
-
-    static HBox addMsg(String body, String details, boolean your, Double threadBoxWidth, ScrollPane threadPane) {
-        HBox msg = new HBox();
-
-        VBox msgContainer = new VBox();
-        msgContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        msg.getChildren().add(msgContainer);
-
-        Text msgBody = new Text(body);
-
-        msgBody.setFont(msgBody.getFont());
-        double msgBodyWidth = msgBody.getBoundsInLocal().getWidth();
-//        System.out.println("text width: "+ msgBodyWidth);
-        if(msgBodyWidth > threadBoxWidth - 15) {
-//            System.out.println("will be wrapped");
-            msgBody.setWrappingWidth(threadBoxWidth - 15);
-        } else {
-            msgBody.setWrappingWidth(msgBodyWidth + 5);
-        }
-
-        threadPane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue.getWidth() == oldValue.getWidth())
-                return;
-
-            if(msgBodyWidth > newValue.getWidth() - 15) {
-                msgBody.setWrappingWidth(newValue.getWidth() - 15);
-            } else {
-                msgBody.setWrappingWidth(msgBodyWidth + 5);
-            }
-        });
-
-        VBox.setVgrow(msgBody, Priority.ALWAYS);
-
-        Label msgDetails = new Label(details);
-
-        msgContainer.getChildren().addAll(msgBody, msgDetails);
-
-        if(your) {
-            msg.setAlignment(Pos.TOP_RIGHT);
-            msgContainer.getStyleClass().add("your_msg");
-            msgContainer.setAlignment(Pos.TOP_RIGHT);
-            msgBody.getStyleClass().add("your_msg_body");
-            msgDetails.getStyleClass().add("your_msg_det");
-        } else {
-            msg.setAlignment(Pos.TOP_LEFT);
-            msgContainer.getStyleClass().add("user_msg");
-            msgContainer.setAlignment(Pos.TOP_LEFT);
-            msgBody.getStyleClass().add("user_msg_body");
-            msgDetails.getStyleClass().add("user_msg_det");
-        }
-
-
-        return msg;
-    }
 
     public ThreadView(Stage stage, ThreadController threadController) throws IOException {
         FXMLLoader loader= new FXMLLoader(getClass().getResource("ThreadView.fxml"));

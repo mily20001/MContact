@@ -244,7 +244,6 @@ public class MainController {
         Stage stage = new Stage();
         ThreadController threadController = new ThreadController(socket, mainModel.getName(), stage);
         /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
-        new ThreadView(stage, threadController);
     }
 
     public void closingMainWindow() {

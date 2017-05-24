@@ -39,7 +39,7 @@ public class ThreadController {
     private Button sendButton;
 
     @FXML
-    private Button connectButton;
+    private Button button1;
 
     @FXML
     private VBox threadBox;
@@ -48,6 +48,7 @@ public class ThreadController {
     private ScrollPane threadPane;
 
     private ThreadModel threadModel;
+    private ThreadView threadView;
 
     @FXML
     public void sendMessage() {
@@ -61,7 +62,7 @@ public class ThreadController {
 
         System.out.println(msg.toJSON());
 
-        threadBox.getChildren().add(ThreadView.addMsg(msg, true, threadBox.getWidth(), threadPane));
+        Platform.runLater(() -> threadModel.addMessage(msg));
 
         JSONObject obj = new JSONObject();
         obj.put("body", msg.toJSON());
@@ -75,15 +76,14 @@ public class ThreadController {
     @FXML
     public void addMsg(String json) {
         Message msg = new Message(json);
-        String body = msg.body;
-//        System.out.println("Adding message: "+body);
-        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(msg, false, threadBox.getWidth(), threadPane)));
+        sendDelivered(msg.getId());
+        Platform.runLater(() -> threadModel.addMessage(msg));
     }
 
     @FXML
     public void addInfoMsg(String body) {
         Message msg = new Message(body, "Internal");
-        Platform.runLater(() -> threadBox.getChildren().add(ThreadView.addMsg(msg, false, threadBox.getWidth(), threadPane)));
+        Platform.runLater(() -> threadModel.addMessage(msg));
     }
 
     @FXML
@@ -119,6 +119,13 @@ public class ThreadController {
             e.printStackTrace();
         }
 
+    }
+
+    private void sendDelivered(String id) {
+        JSONObject obj = new JSONObject();
+        obj.put("id", id);
+
+        sendObject("deliver", obj);
     }
 
     private void handshake() {
@@ -166,6 +173,9 @@ public class ThreadController {
                 final String msgJSON = parsedMsg.getString("body");
 
                 Platform.runLater(() -> addMsg(msgJSON));
+            } else if (Objects.equals(msgType, "deliver")) {
+//                System.out.println("Got delivery raport for " + parsedMsg.getString("id"));
+                threadModel.delivered(parsedMsg.getString("id"));
             } else {
                 System.out.println("Unknown message type");
             }
@@ -187,6 +197,8 @@ public class ThreadController {
 
     public ThreadController(Socket socket, String yourName, Stage stage) throws IOException {
         threadModel = new ThreadModel(yourName, stage, socket, new PrintWriter(socket.getOutputStream(),true));
+
+        threadView = new ThreadView(stage, this);
 
         sendRSAKey(threadModel.getPublicKey());
 
@@ -245,6 +257,8 @@ public class ThreadController {
     @FXML
     void initialize() {
 
+        threadModel.setThreadBoxPane(threadBox, threadPane);
+
         threadBox.heightProperty().addListener((observable, oldValue, newValue) -> {
             slowScrollToBottom(threadPane);
         });
@@ -257,5 +271,7 @@ public class ThreadController {
             nameLabel.setText("Talking with " + threadModel.getPartnerName());
             threadModel.getThreadStage().setTitle(threadModel.getPartnerName());
         }
+
+//        button1.setOnAction((e) -> threadView.changeAll("XDDDDDD"));
     }
 }

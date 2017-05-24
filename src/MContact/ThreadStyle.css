@@ -28,12 +28,20 @@
     -fx-fill: gray;
 }
 
-.your_msg {
-    -fx-background-color: green;
+.your_msg_delivered {
+    -fx-background-color: #009400;
     -fx-border-color: lawngreen;
     -fx-border-width: 1px;
     -fx-fill: white;
 }
+
+.your_msg_sent {
+    -fx-background-color: #009400;
+    -fx-border-color: #fc0008;
+    -fx-border-width: 1px;
+    -fx-fill: white;
+}
+
 
 .your_msg_body {
     -fx-fill: white;

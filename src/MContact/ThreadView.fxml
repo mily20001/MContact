@@ -14,7 +14,7 @@
          <children>
             <!--<Button mnemonicParsing="false" onAction="#Server0" text="Server" />-->
             <!--<Button mnemonicParsing="false" onAction="#Connect0" text="Client" />-->
-            <Button mnemonicParsing="false" text="Button" />
+            <Button fx:id="button1" mnemonicParsing="false" text="Button" />
             <Button mnemonicParsing="false" text="Button" />
          </children>
       </HBox>
