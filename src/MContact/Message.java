@@ -17,10 +17,11 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Locale;
 
+/** Message model class */
 public class Message {
-    protected String body;
-    protected Date date;
-    protected String author;
+    private String body;
+    private Date date;
+    private String author;
     private String id="";
     private Boolean delivered;
     private Boolean your;
@@ -29,7 +30,12 @@ public class Message {
     private Text msgBody;
     private Label msgDetails;
 
-    public Message(String body, String author) {
+    /**
+     * Construct new Message instance with given body an author. The date of message is set to current time.
+     * @param body plaintext message body string
+     * @param author plaintext author string
+     */
+    Message(String body, String author) {
         delivered = false;
         your = true;
         this.body = body;
@@ -48,32 +54,42 @@ public class Message {
         }
     }
 
-    public Message(String json) {
+    /**
+     * Construct new Message instance with given body an author. The date of message is set to current time.
+     * @param json stringified json object containing message data, such as body, author, date and id
+     */
+    Message(String json) {
         delivered = true;
         your = false;
         JSONObject parsed = new JSONObject(json);
         body = parsed.getString("body");
         author = parsed.getString("author");
         id = parsed.getString("id");
-        System.out.println("md5RECEIVED: "+id);
-        //TODO: oznaczyc odpowiednia wiadomosc jako dostarczoną
 
         System.out.println(parsed.getString("date"));
         DateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss zzz", Locale.ENGLISH);
         try {
             date = format.parse(parsed.getString("date"));
         } catch (ParseException e) {
-            System.out.println("error parsing date while adding new message");
+            System.out.println("Error parsing date while adding new message");
             e.printStackTrace();
         }
     }
 
-    public String getDateString() {
+    /**
+     * Parse message date to nice string.
+     * @return message date string
+     */
+    private String getDateString() {
         SimpleDateFormat ft = new SimpleDateFormat ("dd.MM HH:mm:ss");
         return ft.format(date);
     }
 
-    public String toJSON() {
+    /**
+     * Convert message to json object and stringify it.
+     * @return stringified json object containing message data such as body, date, author, id
+     */
+     String toJSON() {
         SimpleDateFormat ft = new SimpleDateFormat ("dd.MM.yyyy HH:mm:ss zzz", Locale.ENGLISH);
         String dateString = ft.format(date);
         JSONObject obj = new JSONObject();
@@ -85,6 +101,12 @@ public class Message {
         return obj.toString();
     }
 
+    /**
+     * Generate HBox containing single message and bind size listeners for dynamic resize. Your messages are undelivered by default
+     * @param threadBoxWidth width of containing box used for initial measure
+     * @param threadPane message will listen for it's changes to dynamically resize
+     * @return styled HBox containing message with details (date, author)
+     */
     public HBox render(Double threadBoxWidth, ScrollPane threadPane) {
         String details = this.author + ", " + this.getDateString();
         HBox msg = new HBox();
@@ -137,10 +159,17 @@ public class Message {
         return msg;
     }
 
+    /**
+     * Returns message id
+     * @return message id
+     */
     String getId() {
         return id;
     }
 
+    /**
+     * Change message box style class to delivered
+     */
     void delivered() {
         delivered = true;
         msgContainer.getStyleClass().clear();

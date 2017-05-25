@@ -8,9 +8,17 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Class representing single thread window view
+ */
 class ThreadView {
 
-    public void detailsAlert(String yourHash, String partnerHash) {
+    /**
+     * Shows alert with connection details
+     * @param yourHash hash of your AES key
+     * @param partnerHash hash of partner AES key
+     */
+    void detailsAlert(String yourHash, String partnerHash) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.getDialogPane().getStylesheets().add(
                 getClass().getResource("dialogs.css").toExternalForm());
@@ -21,7 +29,13 @@ class ThreadView {
         alert.show();
     }
 
-    public ThreadView(Stage stage, ThreadController threadController) throws IOException {
+    /**
+     *
+     * @param stage current thread window stage
+     * @param threadController current thread window controller
+     * @throws IOException if fxml or css files not found
+     */
+    ThreadView(Stage stage, ThreadController threadController) throws IOException {
         FXMLLoader loader= new FXMLLoader(getClass().getResource("ThreadView.fxml"));
         loader.setController(threadController);
         loader.setClassLoader(getClass().getClassLoader());

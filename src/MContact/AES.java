@@ -6,12 +6,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import java.util.Base64;
 
-public class AES {
+class AES {
     /**
      * Returns a new secret AES key.
      * @return a secret AES key
      */
-    public static SecretKey generateKey(){
+    static SecretKey generateKey(){
         KeyGenerator keyGenerator = null;
         try {
             keyGenerator = KeyGenerator.getInstance("AES");
@@ -23,12 +23,12 @@ public class AES {
     }
 
     /**
-     * Returns an AES-encrypted byte array given a plaintext string and a secret AES key.
+     * Returns an AES-encrypted base64 encoded string of given plaintext string encrypted using a secret AES key.
      * @param plaintext a plaintext string
      * @param key a secret AES key
-     * @return ciphertext
+     * @return encrypted string
      */
-    public static String encrypt(String plaintext, SecretKey key){
+    static String encrypt(String plaintext, SecretKey key){
         byte[] ciphertext = null;
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -50,7 +50,7 @@ public class AES {
      * @param key a secret AES key
      * @return plaintext
      */
-    public static String decrypt(String encryptedString, SecretKey key){
+    static String decrypt(String encryptedString, SecretKey key){
         byte[] ciphertext = Base64.getDecoder().decode(encryptedString);
         byte[] plaintext = null;
         try {
