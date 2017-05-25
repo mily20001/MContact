@@ -13,6 +13,16 @@
     -fx-border-width: 1px;
 }
 
+.detailsButton {
+    -fx-base: #404040;
+    -fx-text-fill: white;
+}
+
+.sendButton {
+    -fx-base: #404040;
+    -fx-text-fill: white;
+}
+
 .user_msg {
     -fx-background-color: darkblue;
     -fx-border-color: deepskyblue;
