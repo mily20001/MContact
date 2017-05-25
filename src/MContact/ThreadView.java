@@ -30,7 +30,7 @@ class ThreadView {
     }
 
     /**
-     *
+     * Constructs thread view and bind controller to it
      * @param stage current thread window stage
      * @param threadController current thread window controller
      * @throws IOException if fxml or css files not found

@@ -6,6 +6,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import java.util.Base64;
 
+/** Class which handles AES key generation, encryption and decryption */
 class AES {
     /**
      * Returns a new secret AES key.

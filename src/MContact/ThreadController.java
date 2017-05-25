@@ -29,7 +29,7 @@ import java.util.Base64;
 import java.util.Objects;
 
 /** Controller class of single thread window */
-public class ThreadController {
+class ThreadController {
     @FXML
     private Label nameLabel;
 
@@ -75,7 +75,10 @@ public class ThreadController {
 
     }
 
-    /** Adds new message from json */
+    /**
+     * Adds new message from json
+     * @param json stringified JSON object containing message object
+     */
     @FXML
     private void addMsg(String json) {
         Message msg = new Message(json);
@@ -83,14 +86,20 @@ public class ThreadController {
         Platform.runLater(() -> threadModel.addMessage(msg));
     }
 
-    /** Adds new internal message */
+    /**
+     * Adds new internal message
+     * @param body body of message which will be added
+     */
     @FXML
     private void addInfoMsg(String body) {
         Message msg = new Message(body, "Internal");
         Platform.runLater(() -> threadModel.addMessage(msg));
     }
 
-    /** Handle pressing ENTER on textarea */
+    /**
+     * Handle pressing ENTER on textarea
+     * @param e event
+     */
     @FXML
     private void inputAreaKeyPressed(KeyEvent e) {
         if(e.getCode() == KeyCode.ENTER) {
@@ -123,8 +132,6 @@ public class ThreadController {
         }
 
     }
-
-    //encrypt and stringify object
 
     /**
      * Encode and encrypt JSON object using your AES key to Base64, then call @see sendData.
@@ -213,11 +220,19 @@ public class ThreadController {
         }
     }
 
+    /**
+     * Encode your RSA public key and sends it via {@link #sendData} function
+     * @param key your RSA public key
+     */
     private void sendRSAKey(PublicKey key) {
         System.out.println("Your RSA public key: " + new String(Base64.getEncoder().encode(key.getEncoded())));
         sendData("rsa", new String(Base64.getEncoder().encode(key.getEncoded())));
     }
 
+    /**
+     * Encrypt and encode your AES secret key using your RSA private key and sends it via {@link #sendData} function
+     * @param key your secret AES key
+     */
     private void sendAESKey(SecretKey key) {
         byte[] plainKey = key.getEncoded();
 
@@ -226,7 +241,14 @@ public class ThreadController {
         sendData("aes", new String(Base64.getEncoder().encode(encryptedKey)));
     }
 
-    public ThreadController(Socket socket, String yourName, Stage stage) throws IOException {
+    /**
+     * Construct new thread controller. Also starts listening for incoming messages
+     * @param socket socket used for connections
+     * @param yourName your nick/name
+     * @param stage thread's window stage
+     * @throws IOException when ThreadView fails to construct
+     */
+    ThreadController(Socket socket, String yourName, Stage stage) throws IOException {
         threadModel = new ThreadModel(yourName, stage, socket, new PrintWriter(socket.getOutputStream(),true));
 
         threadView = new ThreadView(stage, this);
@@ -269,7 +291,10 @@ public class ThreadController {
         new Thread(runnable).start();
     }
 
-    public void closingWindow() {
+    /**
+     * Handle closing window, mainly by closing connection
+     */
+    void closingWindow() {
         System.out.println("closing controller");
         try {
             threadModel.getSocket().close();
@@ -278,6 +303,10 @@ public class ThreadController {
         }
     }
 
+    /**
+     * Take care of scrolling to the bottom after adding new message or resizing window
+     * @param scrollPane scrollPane which we want to scroll
+     */
     private static void slowScrollToBottom(ScrollPane scrollPane) {
         Animation animation = new Timeline(
                 new KeyFrame(Duration.seconds(0.15),
@@ -285,6 +314,9 @@ public class ThreadController {
         animation.play();
     }
 
+    /**
+     * FXML constructor, called after initialization of all FXML elements. Bind events to proper elements.
+     */
     @FXML
     void initialize() {
 

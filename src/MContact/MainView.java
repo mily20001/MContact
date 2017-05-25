@@ -7,8 +7,15 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/** Class representing main window view */
 class MainView {
-    public MainView(Stage stage, MainController mainController) throws IOException {
+    /**
+     * Constructs main view, adds controller to it and display main window
+     * @param stage stage to be used
+     * @param mainController mainController which will be binded to view
+     * @throws IOException if fxml or css files not found
+     */
+    MainView(Stage stage, MainController mainController) throws IOException {
         FXMLLoader loader= new FXMLLoader(getClass().getResource("MainView.fxml"));
         loader.setController(mainController);
         loader.setClassLoader(getClass().getClassLoader());

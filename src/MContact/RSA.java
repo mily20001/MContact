@@ -6,12 +6,13 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.util.Base64;
 
-public class RSA {
+/** Class which handles RSA keys generation, encryption and decryption */
+class RSA {
     /**
      * Returns a new RSA key pair.
      * @return public and private RSA keys
      */
-    public static KeyPair generateKeyPair(){
+    static KeyPair generateKeyPair(){
         KeyPairGenerator keyPairGenerator = null;
         try {
             keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -28,7 +29,7 @@ public class RSA {
      * @param key a public RSA key
      * @return ciphertext
      */
-    public static byte[] encrypt(byte[] plaintext, PublicKey key){
+    static byte[] encrypt(byte[] plaintext, PublicKey key){
         byte[] ciphertext = null;
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -46,7 +47,7 @@ public class RSA {
      * @param key a private RSA key
      * @return plaintext
      */
-    public static SecretKey decrypt(String encryptedKey, PrivateKey key){
+    static SecretKey decrypt(String encryptedKey, PrivateKey key){
         byte[] ciphertext = Base64.getDecoder().decode(encryptedKey);
         byte[] plaintext = null;
         try {

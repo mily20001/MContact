@@ -15,6 +15,7 @@ import java.net.*;
 import java.util.Optional;
 import java.util.Properties;
 
+/** Controller class of main application */
 public class MainController {
     private MainModel mainModel;
 
@@ -36,6 +37,9 @@ public class MainController {
     @FXML
     private Button changeNameButton;
 
+    /**
+     * Loads config from file, if not found loads default values, then create new main model
+     */
     private void loadConfig() {
         Properties props = new Properties();
         InputStream is = null;
@@ -53,6 +57,7 @@ public class MainController {
         mainModel = new MainModel(name, port);
     }
 
+    /** Saves current configuration to file */
     private void saveConfig() {
         try {
             Properties props = new Properties();
@@ -68,14 +73,14 @@ public class MainController {
         }
     }
 
-    public MainController() throws IOException {
-        System.out.println("hejka z glownego controllera");
-
+    /** Construct new controller and launch server */
+    public MainController() {
         loadConfig();
 
-        Server0();
+        startServer();
     }
 
+    /** Sets events handlers and put proper text in main window */
     @FXML
     void initialize() {
         nameLabel.setText("Hello " + mainModel.getName() + "!");
@@ -102,15 +107,21 @@ public class MainController {
         });
     }
 
-    @FXML void exitButtonClicked(ActionEvent e) {
+    /**
+     * Handles pressing exit button
+     * @param e event
+     */
+    @FXML
+    private void exitButtonClicked(ActionEvent e) {
         final Node source = (Node) e.getSource();
         final Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
         closingMainWindow();
     }
 
+    /** Handles pressing 'Change Port' button by displaying dialog and setting given values. Also restart server on new port */
     @FXML
-    void changePortButtonClicked() {
+    private void changePortButtonClicked() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Change your port");
         dialog.setHeaderText("Change your port number");
@@ -127,7 +138,7 @@ public class MainController {
                 mainModel.setServerPort(Integer.parseInt(result.get()));
                 portLabel.setText("You are listening on port " + mainModel.getServerPort());
                 mainModel.getServerSocket().close();
-                Server0();
+                startServer();
             }
         }
         catch (NumberFormatException e) {
@@ -145,8 +156,9 @@ public class MainController {
         }
     }
 
+    /** Handles pressing 'Change name' button and set your new name in model and in window */
     @FXML
-    public void changeNameButtonClicked() {
+    private void changeNameButtonClicked() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Change your name");
         dialog.setHeaderText("Change your name");
@@ -164,6 +176,10 @@ public class MainController {
         }
     }
 
+    /**
+     * Handles pressing connect button by displaying connection dialog and staring new thread after successful connection
+     * @throws IOException if css are not found
+     */
     @FXML
     public void ConnectButtonClicked() throws IOException {
 
@@ -240,13 +256,18 @@ public class MainController {
         });
     }
 
+    /**
+     * Opens new thread window
+     * @param socket socket on which parter is connected
+     * @throws IOException when thread controller throws it
+     */
     private void openNewThread(Socket socket) throws IOException{
         Stage stage = new Stage();
-        ThreadController threadController = new ThreadController(socket, mainModel.getName(), stage);
-        /*TODO tu trzeba przekazywac imie drugiego usera, a nie swoje*/
+        new ThreadController(socket, mainModel.getName(), stage);
     }
 
-    public void closingMainWindow() {
+    /** Handles closing main application, saves config and closes server */
+    void closingMainWindow() {
         saveConfig();
         if(!mainModel.getServerSocket().isClosed()) {
             System.out.println("closing main server");
@@ -258,16 +279,16 @@ public class MainController {
         }
     }
 
-    public void Server0() throws IOException {
+    /** Start new server and makes it handing new connections properly */
+    private void startServer(){
         Runnable serverLoop = () -> {
-            System.out.println("Starting server 0");
             try {
                 mainModel.setServerSocket(new ServerSocket(mainModel.getServerPort()));
 
                 while (true) {
                     // block until we get a connection from a client
                     final Socket clientSocket = mainModel.getServerSocket().accept();
-                    System.out.println("Client connected to server 0 from " + clientSocket.getInetAddress());
+                    System.out.println("Client connected to server from " + clientSocket.getInetAddress());
 
                     Platform.runLater(() -> {
                         try {
@@ -285,14 +306,7 @@ public class MainController {
             } catch (Exception ex){
                 System.out.println(ex.getMessage() + ex);
             }
-            finally {
-              //  System.out.println("MAIN SERVER CLOSED");
-            }
-
         };
         new Thread(serverLoop).start();
-
-        System.out.println("Server 0 started");
-
     }
 }
