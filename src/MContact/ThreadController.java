@@ -28,6 +28,7 @@ import java.security.PublicKey;
 import java.util.Base64;
 import java.util.Objects;
 
+/** Controller class of single thread window */
 public class ThreadController {
     @FXML
     private Label nameLabel;
@@ -50,8 +51,9 @@ public class ThreadController {
     private ThreadModel threadModel;
     private ThreadView threadView;
 
+    /** Construct new message from textarea and sends it */
     @FXML
-    public void sendMessage() {
+    private void sendMessage() {
 
         String body = inputArea.getText();
         if(body.length() < 1) {
@@ -73,33 +75,41 @@ public class ThreadController {
 
     }
 
+    /** Adds new message from json */
     @FXML
-    public void addMsg(String json) {
+    private void addMsg(String json) {
         Message msg = new Message(json);
         sendDelivered(msg.getId());
         Platform.runLater(() -> threadModel.addMessage(msg));
     }
 
+    /** Adds new internal message */
     @FXML
-    public void addInfoMsg(String body) {
+    private void addInfoMsg(String body) {
         Message msg = new Message(body, "Internal");
         Platform.runLater(() -> threadModel.addMessage(msg));
     }
 
+    /** Handle pressing ENTER on textarea */
     @FXML
-    public void inputAreaKeyPressed(KeyEvent e) {
+    private void inputAreaKeyPressed(KeyEvent e) {
         if(e.getCode() == KeyCode.ENTER) {
             sendMessage();
             e.consume();
         }
     }
 
+    /** Call window which display connection details */
     @FXML
-    public void displayDetails() {
+    private void displayDetails() {
         threadView.detailsAlert(threadModel.getYourAESHash(), threadModel.getPartnerAESHash());
     }
 
-    // data should be in ASCII
+    /**
+     * Creates new JSON object containing type and data field, then sends it via socket
+     * @param type data type
+     * @param data data to send, should be in ASCII
+     */
     private void sendData(String type, String data) {
         try {
             JSONObject finalObj = new JSONObject();
@@ -115,6 +125,12 @@ public class ThreadController {
     }
 
     //encrypt and stringify object
+
+    /**
+     * Encode and encrypt JSON object using your AES key to Base64, then call @see sendData.
+     * @param type message type
+     * @param obj object to send
+     */
     private void sendObject(String type, JSONObject obj) {
         try {
             String data = new String (Base64.getEncoder().encode(obj.toString().getBytes("UTF-8")));
@@ -126,6 +142,10 @@ public class ThreadController {
 
     }
 
+    /**
+     * Creates and sends object containing info about message delivery.
+     * @param id id of message that was delivered
+     */
     private void sendDelivered(String id) {
         JSONObject obj = new JSONObject();
         obj.put("id", id);
@@ -133,6 +153,9 @@ public class ThreadController {
         sendObject("deliver", obj);
     }
 
+    /**
+     * Creates and sends object containing info with your name
+     */
     private void handshake() {
         JSONObject obj = new JSONObject();
         obj.put("body", threadModel.getYourName());
@@ -140,6 +163,10 @@ public class ThreadController {
         sendObject("name", obj);
     }
 
+    /**
+     * Handle reveived data by parsing it and calling proper functions
+     * @param input Base64 encoded string with data from partner
+     */
     private void getData(String input) {
 
         input = new String(Base64.getDecoder().decode(input));
@@ -179,7 +206,6 @@ public class ThreadController {
 
                 Platform.runLater(() -> addMsg(msgJSON));
             } else if (Objects.equals(msgType, "deliver")) {
-//                System.out.println("Got delivery raport for " + parsedMsg.getString("id"));
                 threadModel.delivered(parsedMsg.getString("id"));
             } else {
                 System.out.println("Unknown message type");
