@@ -1,6 +1,7 @@
 package MContact;
 
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -29,6 +30,7 @@ class ThreadModel {
     private Stage threadStage;
     private VBox threadBox;
     private ScrollPane threadPane;
+    private HBox typingMessageHBox;
 
     private KeyPair RSApair;
     private SecretKey AESkey;
@@ -38,6 +40,7 @@ class ThreadModel {
 
     /** Map of all messages */
     private Map <String, Message> messages = new HashMap<>();
+    private TypingMessage typingMessage;
 
     /**
      * Adds new message to message map
@@ -46,6 +49,29 @@ class ThreadModel {
     void addMessage(Message msg){
         messages.put(msg.getId(), msg);
         threadBox.getChildren().add(msg.render(threadBox.getWidth(), threadPane));
+    }
+
+    /**
+     * Checks if there is currently any typing indicator and if not creates new one
+     * @param author name of person who is typing
+     */
+    void setTypingIndicator(String author) {
+        if(typingMessageHBox == null){
+            typingMessage = new TypingMessage(author);
+            typingMessageHBox = typingMessage.render(threadBox.getWidth(), threadPane);
+            threadBox.getChildren().add(typingMessageHBox);
+        }
+    }
+
+    /**
+     * Removes typing indicator if there is any
+     */
+    void unsetTypingIndicator() {
+        if(typingMessageHBox != null){
+            threadBox.getChildren().remove(typingMessageHBox);
+            typingMessageHBox = null;
+            typingMessage = null;
+        }
     }
 
     /**

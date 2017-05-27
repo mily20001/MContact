@@ -54,6 +54,11 @@ public class Message {
         }
     }
 
+    /** Default constructor */
+    Message() {
+        your = false;
+    }
+
     /**
      * Construct new Message instance with given body an author. The date of message is set to current time.
      * @param json stringified json object containing message data, such as body, author, date and id

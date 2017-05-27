@@ -104,7 +104,11 @@ class ThreadController {
     private void inputAreaKeyPressed(KeyEvent e) {
         if(e.getCode() == KeyCode.ENTER) {
             sendMessage();
+            sendTyping(0);
             e.consume();
+        }
+        else{
+            sendTyping(inputArea.getText().length());
         }
     }
 
@@ -161,6 +165,21 @@ class ThreadController {
     }
 
     /**
+     * Checks if there is any text in textArea and sends proper message to partner
+     * @param textLength length of text currently entered in textArea
+     */
+    private void sendTyping(Integer textLength) {
+        JSONObject obj = new JSONObject();
+        if(textLength > 0) {
+            obj.put("author", threadModel.getYourName());
+            sendObject("typing", obj);
+        }
+        else {
+            sendObject("stopped_typing", obj);
+        }
+    }
+
+    /**
      * Creates and sends object containing info with your name
      */
     private void handshake() {
@@ -214,6 +233,10 @@ class ThreadController {
                 Platform.runLater(() -> addMsg(msgJSON));
             } else if (Objects.equals(msgType, "deliver")) {
                 threadModel.delivered(parsedMsg.getString("id"));
+            } else if (Objects.equals(msgType, "typing")) {
+                Platform.runLater(() -> threadModel.setTypingIndicator(parsedMsg.getString("author")));
+            } else if (Objects.equals(msgType, "stopped_typing")) {
+                Platform.runLater(() -> threadModel.unsetTypingIndicator());
             } else {
                 System.out.println("Unknown message type");
             }
